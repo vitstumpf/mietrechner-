@@ -1,0 +1,209 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Außenwerbung Mietrechner</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300..700&display=swap" rel="stylesheet">
+<style>
+:root{--bg:#f7f6f2;--surface:#ffffff;--border:#e0ddd8;--text:#1a1916;--muted:#6b6a66;--primary:#01696f;--primary-h:#0c4e54;--primary-l:#e6f2f2;--accent:#da7101;--accent-l:#fff3e6;--error:#c0392b;--r:10px;--rl:16px;--shadow:0 2px 8px rgba(0,0,0,.07),0 8px 24px rgba(0,0,0,.05);--t:180ms cubic-bezier(.16,1,.3,1);--font:'Inter',system-ui,sans-serif}
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+body{font-family:var(--font);background:var(--bg);color:var(--text);min-height:100vh;display:flex;align-items:center;justify-content:center;padding:24px 16px}
+.widget{background:var(--surface);border-radius:var(--rl);box-shadow:var(--shadow);width:100%;max-width:480px;padding:36px 32px 32px;border:1px solid var(--border)}
+.logo{display:flex;align-items:center;gap:10px;margin-bottom:28px}
+.logo-text{font-size:15px;font-weight:600;color:var(--primary);letter-spacing:-.2px}
+.logo-sub{font-size:11px;color:var(--muted)}
+h1{font-size:20px;font-weight:700;letter-spacing:-.4px;margin-bottom:6px;line-height:1.3}
+.subtitle{font-size:13px;color:var(--muted);margin-bottom:28px;line-height:1.5}
+.field{margin-bottom:18px}
+label{display:block;font-size:12px;font-weight:600;color:var(--muted);text-transform:uppercase;letter-spacing:.5px;margin-bottom:6px}
+.input-wrap{position:relative;display:flex;align-items:center}
+.input-wrap svg{position:absolute;left:12px;color:var(--muted);pointer-events:none}
+input[type=text]{width:100%;padding:11px 40px;font-family:var(--font);font-size:15px;color:var(--text);background:var(--bg);border:1.5px solid var(--border);border-radius:var(--r);outline:none;transition:border-color var(--t),box-shadow var(--t)}
+input[type=text]:focus{border-color:var(--primary);box-shadow:0 0 0 3px rgba(1,105,111,.12);background:#fff}
+input::placeholder{color:#bbb}
+.clear-btn{position:absolute;right:10px;background:none;border:none;cursor:pointer;color:#bbb;padding:4px;display:none;border-radius:50%;line-height:0;transition:color var(--t)}
+.clear-btn:hover{color:var(--muted)}
+.btn{width:100%;padding:13px;background:var(--primary);color:#fff;font-family:var(--font);font-size:15px;font-weight:600;border:none;border-radius:var(--r);cursor:pointer;transition:background var(--t),transform var(--t),box-shadow var(--t);display:flex;align-items:center;justify-content:center;gap:8px;margin-top:8px}
+.btn:hover{background:var(--primary-h);box-shadow:0 4px 16px rgba(1,105,111,.25)}
+.btn:active{transform:scale(.98)}
+.btn:disabled{opacity:.6;cursor:not-allowed;transform:none}
+.spinner{width:18px;height:18px;border:2px solid rgba(255,255,255,.3);border-top-color:#fff;border-radius:50%;animation:spin .7s linear infinite;display:none}
+@keyframes spin{to{transform:rotate(360deg)}}
+.status{font-size:12px;text-align:center;margin-top:12px;min-height:18px;color:var(--muted)}
+.status.error{color:var(--error)}
+.result{margin-top:28px;display:none;animation:fadeUp .4s cubic-bezier(.16,1,.3,1)}
+@keyframes fadeUp{from{opacity:0;transform:translateY(12px)}to{opacity:1;transform:translateY(0)}}
+.divider{height:1px;background:var(--border);margin-bottom:24px}
+.result-title{font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.8px;color:var(--muted);margin-bottom:16px}
+.grid{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:16px}
+.card{background:var(--bg);border-radius:var(--r);padding:14px 16px;border:1px solid var(--border)}
+.card.full{grid-column:1/-1}
+.card.orange{background:var(--accent-l);border-color:rgba(218,113,1,.2);grid-column:1/-1;padding:18px 20px}
+.clabel{font-size:11px;font-weight:600;text-transform:uppercase;letter-spacing:.5px;color:var(--muted);margin-bottom:4px}
+.card.orange .clabel{color:var(--accent)}
+.cval{font-size:24px;font-weight:700;letter-spacing:-.5px;line-height:1.2}
+.card.orange .cval{font-size:22px;color:var(--accent)}
+.csub{font-size:11px;color:var(--muted);margin-top:2px}
+.hint{font-size:11px;color:var(--muted);text-align:center;margin-top:16px;line-height:1.5}
+.not-found{background:#fef9ec;border:1px solid #f0d080;border-radius:var(--r);padding:16px;font-size:13px;color:#7a5500;line-height:1.5;display:none;margin-top:20px}
+@media(max-width:400px){.widget{padding:24px 20px 20px}.grid{grid-template-columns:1fr}.card.full,.card.orange{grid-column:1}}
+</style>
+</head>
+<body>
+<div class="widget">
+  <div class="logo">
+    <svg width="32" height="32" viewBox="0 0 32 32" fill="none">
+      <rect width="32" height="32" rx="8" fill="#01696f"/>
+      <rect x="7" y="10" width="18" height="2.5" rx="1.25" fill="white"/>
+      <rect x="7" y="15" width="12" height="2.5" rx="1.25" fill="white" opacity="0.7"/>
+      <rect x="7" y="20" width="15" height="2.5" rx="1.25" fill="white" opacity="0.5"/>
+      <circle cx="24" cy="22" r="5" fill="#da7101"/>
+      <text x="24" y="26" text-anchor="middle" font-size="7" font-weight="700" fill="white" font-family="Inter,sans-serif">€</text>
+    </svg>
+    <div>
+      <div class="logo-text">Außenwerbung</div>
+      <div class="logo-sub">Mietrechner</div>
+    </div>
+  </div>
+
+  <h1>Was ist Ihre Werbefläche wert?</h1>
+  <p class="subtitle">Geben Sie die Adresse Ihrer Werbeanlage ein und erhalten Sie sofort eine Mieteinschätzung.</p>
+
+  <div class="field">
+    <label for="address">Standortadresse</label>
+    <div class="input-wrap">
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+        <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/>
+      </svg>
+      <input type="text" id="address" placeholder="z.B. Kaiserstraße 10, Frankfurt" autocomplete="off">
+      <button class="clear-btn" id="clearBtn" onclick="clearAddress()" aria-label="Löschen">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round">
+          <line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/>
+        </svg>
+      </button>
+    </div>
+  </div>
+
+  <button class="btn" id="calcBtn" onclick="berechnen()">
+    <span id="btnText">Jetzt berechnen</span>
+    <div class="spinner" id="spinner"></div>
+  </button>
+
+  <div class="status" id="status"></div>
+
+  <div class="result" id="result">
+    <div class="divider"></div>
+    <div class="result-title">Ihre Einschätzung</div>
+    <div class="grid">
+      <div class="card full">
+        <div class="clabel">Standortadresse</div>
+        <div class="cval" id="res-address" style="font-size:15px;font-weight:600"></div>
+      </div>
+      <div class="card">
+        <div class="clabel">Kontakte pro Termin</div>
+        <div class="cval" id="res-contacts">–</div>
+        <div class="csub" id="res-contacts-sub"></div>
+      </div>
+      <div class="card">
+        <div class="clabel">Tagespreis (Markt)</div>
+        <div class="cval" id="res-daily">–</div>
+        <div class="csub">netto</div>
+      </div>
+      <div class="card orange">
+        <div class="clabel">Mögliche Miete</div>
+        <div class="cval" id="res-rent">–</div>
+        <div class="csub">bis zu · Netto-Jahresmiete</div>
+      </div>
+    </div>
+    <div class="hint" id="hint"></div>
+  </div>
+
+  <div class="not-found" id="notFound">
+    ⚠️ Für diese Adresse konnte keine Werbefläche gefunden werden. Bitte prüfen Sie die Eingabe oder kontaktieren Sie uns direkt.
+  </div>
+</div>
+
+<script>
+  // !! Nach dem Vercel-Deploy: IHRE-VERCEL-URL durch Ihre echte URL ersetzen !!
+  const PROXY_URL = 'https://IHRE-VERCEL-URL.vercel.app/api/werbeflaeche';
+  const JAHRESFAKTOR = 26;
+  const TOLERANZ = 150;
+  const $ = id => document.getElementById(id);
+
+  $('address').addEventListener('input', function() {
+    $('clearBtn').style.display = this.value ? 'flex' : 'none';
+    $('result').style.display = 'none';
+    $('notFound').style.display = 'none';
+    $('status').textContent = '';
+    $('status').className = 'status';
+  });
+  $('address').addEventListener('keydown', e => { if (e.key === 'Enter') berechnen(); });
+
+  function clearAddress() {
+    $('address').value = '';
+    $('clearBtn').style.display = 'none';
+    $('result').style.display = 'none';
+    $('notFound').style.display = 'none';
+    $('status').textContent = '';
+    $('address').focus();
+  }
+
+  function setLoading(on) {
+    $('calcBtn').disabled = on;
+    $('spinner').style.display = on ? 'block' : 'none';
+    $('btnText').textContent = on ? 'Suche läuft…' : 'Jetzt berechnen';
+  }
+
+  const eur = v => new Intl.NumberFormat('de-DE',{style:'currency',currency:'EUR',minimumFractionDigits:0,maximumFractionDigits:0}).format(v);
+  const num = v => new Intl.NumberFormat('de-DE').format(v);
+
+  async function berechnen() {
+    const address = $('address').value.trim();
+    if (!address) {
+      $('status').textContent = 'Bitte eine Adresse eingeben.';
+      $('status').className = 'status error';
+      $('address').focus();
+      return;
+    }
+    $('result').style.display = 'none';
+    $('notFound').style.display = 'none';
+    $('status').textContent = '';
+    setLoading(true);
+    $('status').textContent = 'Marktpreise werden abgerufen …';
+
+    try {
+      const res = await fetch(`${PROXY_URL}?address=${encodeURIComponent(address)}`);
+      const data = await res.json();
+      setLoading(false);
+
+      if (!data.found || !data.pricePerDay) {
+        $('notFound').style.display = 'block';
+        $('status').textContent = '';
+        return;
+      }
+
+      const tagespreis = data.pricePerDay;
+      const jahresmieteMax = tagespreis * JAHRESFAKTOR + TOLERANZ;
+      const kontakte = data.contacts || null;
+      const periode = data.contactPeriod || 'Tag';
+
+      $('res-address').textContent = address;
+      $('res-daily').textContent = eur(tagespreis);
+      $('res-contacts').textContent = kontakte ? num(kontakte) : 'n. v.';
+      $('res-contacts-sub').textContent = kontakte ? `pro ${periode}` : 'keine Daten';
+      $('res-rent').textContent = `bis zu ${eur(jahresmieteMax)}`;
+      $('hint').textContent = `Berechnung: Tagespreis (${eur(tagespreis)}) × ${JAHRESFAKTOR} Buchungstage + ${TOLERANZ} € Toleranz. Alle Angaben netto, ohne Gewähr.`;
+      $('result').style.display = 'block';
+      $('status').textContent = '';
+    } catch(err) {
+      setLoading(false);
+      $('status').textContent = 'Verbindungsfehler. Bitte versuchen Sie es erneut.';
+      $('status').className = 'status error';
+    }
+  }
+</script>
+</body>
+</html>
